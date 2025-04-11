@@ -11,7 +11,7 @@ REQUIRES: x86_64-linux
 # RUN: llvm-bolt -v=3 -instrument %p/Output/python -o %t.null \
 # RUN:   -skip-funcs=_PyEval_EvalFrameDefault.cold/1 2>&1 | \
 # RUN:   FileCheck %s --check-prefix=CHECK-INST
-# CHECK-INST: BOLT-INFO: Multiple fragments access same jump table: sre_ucs4_match.cold/1(*2); sre_ucs4_match/1(*2)
+# CHECK-INST: BOLT-INFO: multiple fragments access the same jump table: sre_ucs4_match.cold/1(*2); sre_ucs4_match/1(*2)
 
 # Optimize in lite mode using pre-collected fdata profile
 #

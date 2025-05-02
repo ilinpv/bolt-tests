@@ -1,0 +1,37 @@
+# Checks heatmap functionality
+RUN: mkdir -p %p/Output
+RUN: test -f %p/Output/libpython3.8-pyston2.3.so.1.0.perf || \
+RUN:   unzstd %p/Inputs/libpython3.8-pyston2.3.so.1.0.perf.zst \
+RUN:   -o %p/Output/libpython3.8-pyston2.3.so.1.0.perf
+RUN: test -f %p/Output/libpython3.8-pyston2.3.so.1.0.prebolt || \
+RUN:   unzstd %p/Inputs/libpython3.8-pyston2.3.so.1.0.prebolt.zst \
+RUN:   -o %p/Output/libpython3.8-pyston2.3.so.1.0.prebolt
+
+# Heatmap in LBR mode
+RUN: llvm-bolt-heatmap -p %p/Output/libpython3.8-pyston2.3.so.1.0.perf \
+RUN:   %p/Output/libpython3.8-pyston2.3.so.1.0.prebolt -o %t.hm \
+RUN:   | FileCheck %s --check-prefix=CHECK-HEATMAP
+CHECK-HEATMAP: 4808721 LBR
+CHECK-HEATMAP: invalid traces: 27563
+RUN: FileCheck %s --input-file=%t.hm-section-hotness.csv \
+RUN:   --check-prefix=CHECK-SEC-HOT
+CHECK-SEC-HOT:      .init, 0x771a0, 0x771ba, 0.0000
+CHECK-SEC-HOT-NEXT: .plt, 0x771c0, 0x78820, 0.7066
+CHECK-SEC-HOT-NEXT: .plt.got, 0x78820, 0x78838, 0.0000
+CHECK-SEC-HOT-NEXT: .text, 0x78840, 0x363ebc, 86.4700
+CHECK-SEC-HOT-NEXT: .fini, 0x363ebc, 0x363ec5, 0.0000
+CHECK-SEC-HOT-NEXT: [unmapped], 0x0, 0x0, 12.8234
+
+# Heatmap in basic samples mode
+RUN: llvm-bolt-heatmap -p %p/Output/libpython3.8-pyston2.3.so.1.0.perf \
+RUN:   %p/Output/libpython3.8-pyston2.3.so.1.0.prebolt -o %t.hm.nl -nl \
+RUN:   | FileCheck %s --check-prefix=CHECK-HEATMAP-NL
+CHECK-HEATMAP-NL: read 169726 {{.*}}samples
+RUN: FileCheck %s --input-file=%t.hm.nl-section-hotness.csv \
+RUN:   --check-prefix=CHECK-SEC-HOT-NL
+CHECK-SEC-HOT-NL:      .init, 0x771a0, 0x771ba, 0.0000
+CHECK-SEC-HOT-NL-NEXT: .plt, 0x771c0, 0x78820, 0.1434
+CHECK-SEC-HOT-NL-NEXT: .plt.got, 0x78820, 0x78838, 0.0000
+CHECK-SEC-HOT-NL-NEXT: .text, 0x78840, 0x363ebc, 86.5438
+CHECK-SEC-HOT-NL-NEXT: .fini, 0x363ebc, 0x363ec5, 0.0000
+CHECK-SEC-HOT-NL-NEXT: [unmapped], 0x0, 0x0, 13.3128

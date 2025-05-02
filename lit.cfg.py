@@ -48,6 +48,7 @@ tool_dirs = [config.llvm_tools_dir,
 tools = [
     ToolSubst('llvm-bat-dump', unresolved='fatal'),
     ToolSubst('llvm-bolt', unresolved='fatal'),
+    ToolSubst('llvm-bolt-heatmap', unresolved='fatal'),
     ToolSubst('llvm-dwarfdump', unresolved='fatal'),
     ToolSubst('llvm-nm', unresolved='fatal'),
     ToolSubst('llvm-objdump', unresolved='fatal'),

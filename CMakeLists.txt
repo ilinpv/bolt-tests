@@ -13,6 +13,7 @@ set(BOLTTESTS_DEPS
   FileCheck
   llvm-bat-dump
   llvm-bolt
+  llvm-bolt-heatmap
   llvm-config
   llvm-dwarfdump
   llvm-nm
